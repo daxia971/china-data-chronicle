@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中国数据编年史 · 1949 起</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2230; --line:#2a3140;
+    --txt:#e6edf3; --sub:#9aa7b4; --accent:#e63946; --accent2:#f4a261;
+    --blue:#4ea8de; --green:#57cc99; --purple:#b191ff; --gold:#ffd166; --pink:#ff8fab;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--txt);font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;line-height:1.6}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 16px 80px}
+  header{padding:38px 16px 24px;text-align:center;background:radial-gradient(1200px 400px at 50% -120px,rgba(230,57,70,.18),transparent)}
+  header h1{font-size:30px;letter-spacing:2px}
+  header .sub{color:var(--sub);margin-top:8px;font-size:14px}
+  .flag{color:var(--accent2)}
+  nav{position:sticky;top:0;z-index:20;background:rgba(13,17,23,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);display:flex;gap:6px;overflow-x:auto;padding:10px 12px}
+  nav button{white-space:nowrap;background:var(--panel);color:var(--sub);border:1px solid var(--line);padding:8px 15px;border-radius:22px;cursor:pointer;font-size:14px;transition:.15s}
+  nav button:hover{color:var(--txt)}
+  nav button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  section{display:none;animation:fade .3s}
+  section.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+  h2.tt{font-size:22px;margin:30px 0 6px;display:flex;align-items:center;gap:10px}
+  h2.tt::before{content:"";width:5px;height:22px;background:var(--accent);border-radius:3px}
+  .note{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);padding:10px 14px;border-radius:8px;color:var(--sub);font-size:13px;margin:14px 0}
+  .note b{color:var(--gold)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:18px}
+  .chartbox{position:relative;height:420px}
+  table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14px}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}
+  th{color:var(--sub);font-weight:600;position:sticky;top:0;background:var(--panel)}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .scroll{max-height:440px;overflow:auto;border-radius:10px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:16px}
+  .kpi{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .kpi .v{font-size:26px;font-weight:700;color:var(--accent2)}
+  .kpi .l{color:var(--sub);font-size:13px;margin-top:2px}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+  .filters button{background:var(--panel2);border:1px solid var(--line);color:var(--sub);padding:6px 14px;border-radius:16px;cursor:pointer;font-size:13px}
+  .filters button.on{color:#fff}
+  .tl{position:relative;margin-top:10px;padding-left:26px}
+  .tl::before{content:"";position:absolute;left:9px;top:0;bottom:0;width:2px;background:var(--line)}
+  .ev{position:relative;padding:12px 0 12px 8px;border-bottom:1px dashed rgba(255,255,255,.05)}
+  .ev::before{content:"";position:absolute;left:-21px;top:18px;width:12px;height:12px;border-radius:50%;border:2px solid var(--bg)}
+  .ev .yr{font-weight:700;font-size:16px;margin-right:8px}
+  .ev .tag{font-size:11px;padding:2px 8px;border-radius:10px;color:#0d1117;font-weight:700;vertical-align:middle}
+  .ev .desc{color:var(--sub);font-size:14px;margin-top:4px}
+  .c-policy{background:var(--blue)} .ev[data-c=policy]::before{background:var(--blue)}
+  .c-edu{background:var(--green)} .ev[data-c=edu]::before{background:var(--green)}
+  .c-birth{background:var(--purple)} .ev[data-c=birth]::before{background:var(--purple)}
+  .c-house{background:var(--accent2)} .ev[data-c=house]::before{background:var(--accent2)}
+  .c-ai{background:var(--gold)} .ev[data-c=ai]::before{background:var(--gold)}
+  .bar-row{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:14px}
+  .bar-row .rk{width:26px;color:var(--sub);text-align:right}
+  .bar-row .nm{width:60px}
+  .bar-row .bar{height:20px;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .bar-row .vv{color:var(--sub);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .src{color:var(--sub);font-size:12px;margin-top:26px;text-align:center;border-top:1px solid var(--line);padding-top:16px}
+  select{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:14px}
+</style>
+</head>
+<body>
+<header>
+  <h1>中国数据编年史</h1>
+  <div class="sub">从 <span class="flag">1949</span> 出发 · 用数据看这片土地的变化 · <span id="ts"></span></div>
+</header>
+
+<nav id="nav">
+  <button data-t="grad" class="active">🎓 大学毕业生</button>
+  <button data-t="birth">👶 人口出生率</button>
+  <button data-t="enroll">📝 高考录取率</button>
+  <button data-t="wage">💴 平均工资</button>
+  <button data-t="grain">🌾 粮食产量</button>
+  <button data-t="events">📜 大事编年</button>
+  <button data-t="cancer">🩺 癌症数据</button>
+  <button data-t="gdp">💰 各省GDP</button>
+  <button data-t="house">🏠 房地产变迁</button>
+</nav>
+
+<div class="wrap">
+
+<!-- ============ 毕业生 ============ -->
+<section id="grad" class="show">
+  <h2 class="tt">全国高校毕业生数量（1949–2025）</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="v">2.1<span style="font-size:14px">万</span></div><div class="l">1949 年</div></div>
+    <div class="kpi"><div class="v">1222<span style="font-size:14px">万</span></div><div class="l">2025 年</div></div>
+    <div class="kpi"><div class="v">≈582<span style="font-size:14px">倍</span></div><div class="l">76 年增长</div></div>
+    <div class="kpi"><div class="v">1999</div><div class="l">扩招元年</div></div>
+  </div>
+  <div class="note"><b>数据口径</b>：1949–2019 为普通高校本专科毕业生数；2020 年起用官方"高校毕业生总规模"（含研究生），故有口径跳变。文革期间（1966–1976）秩序被打乱，为不完整估计。综合国家统计局、教育部历年公报，个别早期年份为近似值。</div>
+  <div class="card"><div class="chartbox"><canvas id="gradChart"></canvas></div></div>
+  <div class="card"><div class="scroll"><table id="gradTable"><thead><tr><th>年份</th><th class="num">毕业生（万人）</th><th>标记</th></tr></thead><tbody></tbody></table></div></div>
+</section>
+
+<!-- ============ 出生率 ============ -->
+<section id="birth">
+  <h2 class="tt">人口出生率（1949–2024，‰）</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="v">43.4‰</div><div class="l">1963 峰值（补偿性生育）</div></div>
+    <div class="kpi"><div class="v">6.39‰</div><div class="l">2023 历史最低</div></div>
+    <div class="kpi"><div class="v">2022</div><div class="l">人口首次负增长</div></div>
+  </div>
+  <div class="note"><b>说明</b>：出生率＝当年出生人口÷年均总人口（‰）。可见 1959–61 困难时期骤降、1962–63 补偿性反弹、1980 计生后持续走低、2016 二孩短暂回升、2020 后快速下滑。数据来自国家统计局。</div>
+  <div class="card"><div class="chartbox"><canvas id="birthChart"></canvas></div></div>
+  <div class="card"><div class="scroll"><table id="birthTable"><thead><tr><th>年份</th><th class="num">出生率(‰)</th><th>阶段</th></tr></thead><tbody></tbody></table></div></div>
+</section>
+
+<!-- ============ 高考录取率 ============ -->
+<section id="enroll">
+  <h2 class="tt">高考录取率（1977 恢复高考起，%）</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="v">4.8%</div><div class="l">1977 录取率（27万/570万）</div></div>
+    <div class="kpi"><div class="v">≈90%</div><div class="l">近年录取率</div></div>
+    <div class="kpi"><div class="v">1999</div><div class="l">扩招后跃升至56%</div></div>
+  </div>
+  <div class="note"><b>说明</b>：录取率＝录取人数÷报名人数。1977 恢复高考时是"千军万马过独木桥"，如今已是普及化。数字为近似值，不同口径（本专科合计/含高职）略有差异。</div>
+  <div class="card"><div class="chartbox"><canvas id="enrollChart"></canvas></div></div>
+  <div class="card"><table id="enrollTable"><thead><tr><th>年份</th><th class="num">录取率(%)</th><th>说明</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<!-- ============ 平均工资 ============ -->
+<section id="wage">
+  <h2 class="tt">城镇职工年平均工资（元）</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="v">445<span style="font-size:14px">元</span></div><div class="l">1952 年</div></div>
+    <div class="kpi"><div class="v">615<span style="font-size:14px">元</span></div><div class="l">1978 改革前</div></div>
+    <div class="kpi"><div class="v">12万+</div><div class="l">2023 年</div></div>
+  </div>
+  <div class="note"><b>口径</b>：城镇非私营单位就业人员年平均工资（元/年，名义值，未扣物价）。1978→2023 名义增长约 196 倍。注意这是"平均数"，受高薪行业拉高，非中位数。数据来自国家统计局。</div>
+  <div class="card"><div class="chartbox"><canvas id="wageChart"></canvas></div></div>
+  <div class="card"><table id="wageTable"><thead><tr><th>年份</th><th class="num">年均工资(元)</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<!-- ============ 粮食产量 ============ -->
+<section id="grain">
+  <h2 class="tt">全国粮食总产量（1949–2024，万吨）</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="v">1.13<span style="font-size:14px">亿吨</span></div><div class="l">1949 年</div></div>
+    <div class="kpi"><div class="v">7.07<span style="font-size:14px">亿吨</span></div><div class="l">2024 年</div></div>
+    <div class="kpi"><div class="v">21<span style="font-size:14px">连丰</span></div><div class="l">2024 连续增产</div></div>
+  </div>
+  <div class="note"><b>说明</b>：全国粮食总产量（万吨）。1959–61 困难时期明显下跌，1978 家庭联产承包责任制后持续增长，2012 起稳定在 6 亿吨以上。数据来自国家统计局。</div>
+  <div class="card"><div class="chartbox"><canvas id="grainChart"></canvas></div></div>
+  <div class="card"><div class="scroll"><table id="grainTable"><thead><tr><th>年份</th><th class="num">产量(万吨)</th><th>标记</th></tr></thead><tbody></tbody></table></div></div>
+</section>
+
+<!-- ============ 大事编年 ============ -->
+<section id="events">
+  <h2 class="tt">大事编年 · 政策 / 教育 / 计生 / 房产 / AI</h2>
+  <div class="note">按类别筛选查看。精选关键节点，点标签可只看某一类。</div>
+  <div class="filters" id="evFilters">
+    <button data-c="all" class="on" style="background:var(--accent);border-color:var(--accent)">全部</button>
+    <button data-c="policy" class="on"><span style="color:var(--blue)">●</span> 政策/经济</button>
+    <button data-c="edu" class="on"><span style="color:var(--green)">●</span> 教育</button>
+    <button data-c="birth" class="on"><span style="color:var(--purple)">●</span> 计划生育</button>
+    <button data-c="house" class="on"><span style="color:var(--accent2)">●</span> 房地产</button>
+    <button data-c="ai" class="on"><span style="color:var(--gold)">●</span> AI/科技</button>
+  </div>
+  <div class="card"><div class="tl" id="timeline"></div></div>
+</section>
+
+<!-- ============ 癌症 ============ -->
+<section id="cancer">
+  <h2 class="tt">中国癌症发病 · 关键节点</h2>
+  <div class="note"><b>诚实说明</b>：中国肿瘤登记 2000 年后才逐步完善，<b>1949 起没有逐年权威数据</b>，只给有据可查的节点（源：国家癌症中心《中国肿瘤登记年报》、GLOBOCAN）。数字为当年<b>新发病例（万例）</b>。</div>
+  <div class="kpis">
+    <div class="kpi"><div class="v">482<span style="font-size:14px">万</span></div><div class="l">2022 新发</div></div>
+    <div class="kpi"><div class="v">257<span style="font-size:14px">万</span></div><div class="l">2022 死亡</div></div>
+    <div class="kpi"><div class="v">肺癌</div><div class="l">发病第一</div></div>
+  </div>
+  <div class="card"><div class="chartbox"><canvas id="cancerChart"></canvas></div></div>
+  <h2 class="tt" style="font-size:18px">2022 年各癌种新发病例（万例）</h2>
+  <div class="card"><div class="chartbox" style="height:340px"><canvas id="cancerTypeChart"></canvas></div></div>
+  <div class="card"><table id="cancerTable"><thead><tr><th>年份</th><th class="num">新发(万)</th><th class="num">死亡(万)</th><th>说明</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<!-- ============ GDP ============ -->
+<section id="gdp">
+  <h2 class="tt">各省市 GDP 排行榜（前15）</h2>
+  <div class="note"><b>说明</b>：改革开放前省级数据零散，给 <b>2000/2010/2020/2024</b> 四个节点前15名（单位：万亿元，源：国家统计局及各省统计公报）。切换年份看排位变化——广东、江苏长期领跑，山东被浙江追赶。</div>
+  <div class="card">
+    <div style="margin-bottom:10px">选择年份：
+      <select id="gdpYear"><option value="2024">2024</option><option value="2020">2020</option><option value="2010">2010</option><option value="2000">2000</option></select>
+    </div>
+    <div id="gdpBars"></div>
+  </div>
+</section>
+
+<!-- ============ 房地产 ============ -->
+<section id="house">
+  <h2 class="tt">中国房地产 · 政策与价格变迁</h2>
+  <div class="note">图表是全国商品房平均销售价格走势（元/㎡，国家统计局），下方是关键政策时间轴。房价数据 1998 房改后才有全国统计。</div>
+  <div class="card"><div class="chartbox" style="height:340px"><canvas id="houseChart"></canvas></div></div>
+  <div class="card"><div class="tl" id="houseTl"></div></div>
+</section>
+
+<div class="src">数据综合自：国家统计局、教育部、国家癌症中心、各省统计公报及公开资料 · 早期与非登记年份存在估算，仅供趋势参考，请勿作精确引用</div>
+</div>
+
+<script>
+document.getElementById('ts').textContent = '生成于 ' + new Date().toLocaleDateString('zh-CN');
+const AX={x:{ticks:{color:'#9aa7b4',maxTicksLimit:14},grid:{color:'#1c2230'}},y:{ticks:{color:'#9aa7b4'},grid:{color:'#1c2230'}}};
+const LEG={legend:{labels:{color:'#e6edf3'}}};
+function line(id,labels,data,label,color,fill){
+  new Chart(document.getElementById(id),{type:'line',
+    data:{labels,datasets:[{label,data,borderColor:color,backgroundColor:fill,fill:true,tension:.25,pointRadius:2,borderWidth:2}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:LEG,scales:AX}});
+}
+function fillTable(sel,rows){const tb=document.querySelector(sel+' tbody');rows.forEach(r=>{
+  tb.insertAdjacentHTML('beforeend','<tr>'+r.map((c,i)=>i===0?`<td>${c}</td>`:(typeof c==='number'?`<td class="num">${c}</td>`:`<td style="color:var(--accent2)">${c}</td>`)).join('')+'</tr>');});}
+
+/* ---------- 毕业生 ---------- */
+const gradData=[
+[1949,2.1,'建国'],[1952,3.2,''],[1957,5.6,'一五'],[1960,13.5,''],[1962,17.7,''],[1965,17.0,''],
+[1966,0,'文革中断'],[1970,0,'工农兵学员'],[1977,0,'恢复高考'],[1982,45.7,'77/78级毕业'],[1985,48.5,''],
+[1990,61.4,''],[1995,80.5,''],[1998,83.0,''],[1999,84.8,'扩招元年'],[2000,95.0,''],[2001,103.6,''],
+[2002,133.7,''],[2003,187.7,'首届扩招生'],[2004,239.1,''],[2005,306.8,''],[2006,377.5,''],[2007,447.8,''],
+[2008,512.0,''],[2009,531.1,''],[2010,575.4,''],[2011,608.2,''],[2012,624.7,''],[2013,638.7,'最难就业季'],
+[2014,659.4,''],[2015,680.9,''],[2016,704.2,''],[2017,735.8,''],[2018,753.3,''],[2019,758.5,''],
+[2020,874,'口径变·含研究生'],[2021,909,''],[2022,1076,'首破千万'],[2023,1158,''],[2024,1179,''],[2025,1222,'']];
+line('gradChart',gradData.map(d=>d[0]),gradData.map(d=>d[1]),'毕业生（万人）','#e63946','rgba(230,57,70,.15)');
+fillTable('#gradTable',gradData.map(d=>[d[0],d[1]||'—',d[2]]));
+
+/* ---------- 出生率 ---------- */
+const birth=[
+[1949,36.0,'建国'],[1954,37.97,''],[1957,34.03,''],[1959,24.78,'困难时期'],[1961,18.02,'谷底'],
+[1962,37.01,'补偿性反弹'],[1963,43.37,'峰值'],[1965,37.88,''],[1970,33.43,''],[1975,23.01,''],
+[1980,18.21,'独生子女政策'],[1982,22.28,''],[1987,23.33,'第三次婴儿潮'],[1990,21.06,''],[1995,17.12,''],
+[2000,14.03,''],[2005,12.40,''],[2010,11.90,''],[2013,13.03,''],[2015,12.07,''],[2016,12.95,'全面二孩反弹'],
+[2017,12.43,''],[2018,10.94,''],[2019,10.48,''],[2020,8.52,''],[2021,7.52,''],[2022,6.77,'人口负增长'],
+[2023,6.39,'历史最低'],[2024,6.77,'龙年微升']];
+line('birthChart',birth.map(d=>d[0]),birth.map(d=>d[1]),'出生率(‰)','#b191ff','rgba(177,145,255,.15)');
+fillTable('#birthTable',birth.map(d=>[d[0],d[1],d[2]]));
+
+/* ---------- 高考录取率 ---------- */
+const enroll=[
+[1977,4.8,'恢复高考·27万/570万'],[1978,6.6,''],[1979,6.1,''],[1980,8.0,''],[1984,29,''],[1988,25,''],
+[1990,22,''],[1995,49,''],[1998,34,''],[1999,56,'扩招'],[2000,59,''],[2005,57,''],[2008,57,''],
+[2010,69,''],[2013,76,''],[2015,74,''],[2019,79,''],[2020,80,''],[2023,85,''],[2024,90,'近普及']];
+line('enrollChart',enroll.map(d=>d[0]),enroll.map(d=>d[1]),'录取率(%)','#57cc99','rgba(87,204,153,.15)');
+fillTable('#enrollTable',enroll.map(d=>[d[0],d[1],d[2]]));
+
+/* ---------- 平均工资 ---------- */
+const wage=[
+[1952,445],[1957,637],[1965,652],[1978,615],[1980,762],[1985,1148],[1990,2140],[1995,5500],[2000,9371],
+[2005,18364],[2010,37147],[2013,51483],[2015,62029],[2018,82461],[2020,97379],[2022,114029],[2023,120698]];
+line('wageChart',wage.map(d=>d[0]),wage.map(d=>d[1]),'年均工资(元)','#f4a261','rgba(244,162,97,.15)');
+fillTable('#wageTable',wage.map(d=>[d[0],d[1]]));
+
+/* ---------- 粮食产量 ---------- */
+const grain=[
+[1949,11318,'建国'],[1952,16392,''],[1957,19505,'一五'],[1959,16968,'困难时期'],[1960,14385,'谷底'],
+[1962,16000,''],[1965,19453,''],[1970,23996,''],[1978,30477,'改革开放'],[1980,32056,''],[1984,40731,'包产到户见效'],
+[1990,44624,''],[1995,46662,''],[2000,46218,''],[2005,48402,''],[2010,54648,''],[2013,60194,'首破6亿吨'],
+[2015,66060,''],[2020,66949,''],[2023,69541,''],[2024,70650,'再创新高']];
+line('grainChart',grain.map(d=>d[0]),grain.map(d=>d[1]),'粮食产量(万吨)','#ffd166','rgba(255,209,102,.15)');
+fillTable('#grainTable',grain.map(d=>[d[0],d[1],d[2]]));
+
+/* ---------- 大事编年 ---------- */
+const events=[
+[1949,'policy','中华人民共和国成立','开启计划经济时代，土地、工业逐步国有化。'],
+[1953,'policy','第一个五年计划','以156个苏援项目为核心，奠定工业化基础。'],
+[1958,'policy','大跃进 & 人民公社','全民大炼钢铁，随后进入三年困难时期。'],
+[1966,'edu','文革 · 高考中断','高等教育停摆，1970年起招"工农兵学员"（推荐制）。'],
+[1977,'edu','恢复高考','邓小平决策，570万人报考，27万人录取。'],
+[1978,'policy','改革开放','十一届三中全会，从计划经济转向市场经济。'],
+[1978,'policy','家庭联产承包责任制','小岗村包产到户，农业活力释放，粮食增产。'],
+[1980,'birth','独生子女政策','中央"公开信"，推行一对夫妇只生一个。'],
+[1982,'birth','计划生育定为基本国策','写入宪法。'],
+[1986,'edu','《义务教育法》','确立九年制义务教育。'],
+[1992,'policy','南方谈话 · 市场经济','邓小平南巡，明确社会主义市场经济体制。'],
+[1994,'policy','分税制改革','中央与地方财政分成，影响此后"土地财政"。'],
+[1998,'house','房改 · 停止福利分房','住房货币化、商品化，商品房市场起步。'],
+[1999,'edu','高校扩招','招生大幅扩张，高等教育走向大众化。'],
+[2001,'policy','加入WTO','深度融入全球化，出口与制造业腾飞。'],
+[2003,'house','房地产定为支柱产业','国务院18号文，地产投资进入快车道。'],
+[2008,'policy','四万亿刺激','应对金融危机，基建与地产大扩张。'],
+[2010,'house','限购元年','北京等城市首推住房限购，调控常态化。'],
+[2013,'ai','深度学习兴起','AI进入深度学习时代，互联网巨头布局。'],
+[2015,'birth','全面二孩','取消独生子女，允许生育两个孩子。'],
+[2016,'house','"房住不炒"','中央经济工作会议首提，成为长期定调。'],
+[2017,'ai','新一代AI发展规划','国务院发布，提出2030年AI世界领先。'],
+[2021,'birth','三孩政策','进一步放开生育，配套支持出台。'],
+[2021,'house','恒大暴雷 · 房企危机','头部房企流动性危机，行业深度调整。'],
+[2021,'edu','"双减"政策','大幅压减学科类培训，教培行业剧变。'],
+[2022,'ai','ChatGPT发布','OpenAI引爆生成式AI，全球大模型竞赛。'],
+[2023,'ai','国产大模型爆发','文心一言、通义千问密集发布，"百模大战"。'],
+[2024,'ai','AI应用元年','大模型行业落地，Agent、多模态成主线。'],
+[2025,'ai','DeepSeek冲击','低成本开源模型引发全球关注，重塑格局。']];
+const cName={policy:'政策',edu:'教育',birth:'计生',house:'房产',ai:'AI'};
+function renderTimeline(){
+  const on=[...document.querySelectorAll('#evFilters button.on')].map(b=>b.dataset.c);
+  const all=on.includes('all');const tl=document.getElementById('timeline');tl.innerHTML='';
+  events.filter(e=>all||on.includes(e[1])).forEach(e=>{
+    tl.insertAdjacentHTML('beforeend',
+    `<div class="ev" data-c="${e[1]}"><span class="yr">${e[0]}</span>
+     <span class="tag c-${e[1]}">${cName[e[1]]}</span><span style="font-weight:600">${e[2]}</span>
+     <div class="desc">${e[3]}</div></div>`);});
+}
+document.querySelectorAll('#evFilters button').forEach(b=>b.onclick=()=>{
+  if(b.dataset.c==='all'){const t=!b.classList.contains('on');
+    document.querySelectorAll('#evFilters button').forEach(x=>x.classList.toggle('on',t));}
+  else{b.classList.toggle('on');document.querySelector('#evFilters button[data-c=all]').classList.remove('on');}
+  renderTimeline();});
+renderTimeline();
+
+/* ---------- 癌症 ---------- */
+const cancer=[[2000,220,140,'登记初期估计'],[2010,309,196,''],[2015,392,234,'国家癌症中心'],
+[2016,406,241,''],[2020,457,300,'GLOBOCAN'],[2022,482,257,'最新年报']];
+new Chart(document.getElementById('cancerChart'),{type:'bar',
+  data:{labels:cancer.map(d=>d[0]),datasets:[
+    {label:'新发(万)',data:cancer.map(d=>d[1]),backgroundColor:'#e63946'},
+    {label:'死亡(万)',data:cancer.map(d=>d[2]),backgroundColor:'#9aa7b4'}]},
+  options:{responsive:true,maintainAspectRatio:false,plugins:LEG,scales:AX}});
+fillTable('#cancerTable',cancer.map(d=>[d[0],d[1],d[2],d[3]]));
+const ctype=[['肺癌',106.06],['结直肠癌',51.71],['甲状腺癌',46.61],['肝癌',36.77],['胃癌',35.87],['乳腺癌',35.72],['食管癌',22.40],['胰腺癌',11.87]];
+new Chart(document.getElementById('cancerTypeChart'),{type:'bar',
+  data:{labels:ctype.map(d=>d[0]),datasets:[{label:'2022新发(万例)',data:ctype.map(d=>d[1]),backgroundColor:'#f4a261'}]},
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:LEG,scales:AX}});
+
+/* ---------- GDP（万亿元）---------- */
+const gdp={
+ 2024:[['广东',14.16],['江苏',13.70],['山东',9.86],['浙江',9.01],['四川',6.47],['河南',6.36],['湖北',6.00],['福建',5.78],['上海',5.39],['湖南',5.32],['安徽',5.06],['北京',4.98],['河北',4.76],['陕西',3.54],['江西',3.42]],
+ 2020:[['广东',11.08],['江苏',10.27],['山东',7.31],['浙江',6.46],['河南',5.50],['四川',4.86],['福建',4.39],['湖北',4.34],['湖南',4.18],['上海',3.87],['安徽',3.87],['河北',3.62],['北京',3.61],['陕西',2.62],['江西',2.57]],
+ 2010:[['广东',4.60],['江苏',4.14],['山东',3.94],['浙江',2.77],['河南',2.31],['河北',2.03],['辽宁',1.85],['四川',1.72],['上海',1.72],['湖南',1.60],['湖北',1.60],['福建',1.47],['北京',1.41],['安徽',1.24],['内蒙古',1.16]],
+ 2000:[['广东',0.97],['江苏',0.86],['山东',0.85],['浙江',0.60],['河南',0.51],['河北',0.51],['上海',0.48],['辽宁',0.47],['四川',0.40],['湖北',0.39],['福建',0.39],['湖南',0.37],['黑龙江',0.33],['北京',0.25],['安徽',0.30]]
+};
+function renderGdp(){
+  const y=document.getElementById('gdpYear').value;const arr=[...gdp[y]].sort((a,b)=>b[1]-a[1]);
+  const max=arr[0][1];const box=document.getElementById('gdpBars');box.innerHTML='';
+  arr.forEach((d,i)=>{box.insertAdjacentHTML('beforeend',
+    `<div class="bar-row"><span class="rk">${i+1}</span><span class="nm">${d[0]}</span>
+     <div class="bar" style="width:${Math.max(4,d[1]/max*100)}%"></div>
+     <span class="vv">${d[1].toFixed(2)} 万亿</span></div>`);});
+}
+document.getElementById('gdpYear').onchange=renderGdp;renderGdp();
+
+/* ---------- 房地产 ---------- */
+const houseP=[[1998,1854],[2000,2112],[2003,2359],[2005,3168],[2008,3800],[2010,5032],[2012,5791],[2014,6324],
+[2016,7476],[2018,8737],[2020,9860],[2021,10139],[2022,9814],[2023,9640],[2024,9251]];
+line('houseChart',houseP.map(d=>d[0]),houseP.map(d=>d[1]),'商品房均价(元/㎡)','#f4a261','rgba(244,162,97,.15)');
+const houseEv=[
+[1988,'house','土地有偿使用','宪法修正，土地使用权可依法转让。'],
+[1998,'house','房改 · 商品房时代','停止福利分房，市场化开端。'],
+[2003,'house','支柱产业','18号文确立房地产为国民经济支柱。'],
+[2008,'house','救市','金融危机后放松信贷刺激购房。'],
+[2010,'house','限购','"国十条"，北京率先限购。'],
+[2016,'house','房住不炒','中央定调，因城施策。'],
+[2020,'house','三道红线','对房企融资划红线去杠杆。'],
+[2021,'house','房企暴雷','恒大等流动性危机，深度调整。'],
+[2024,'house','政策转向宽松','取消限购、降首付降利率，多城救市。']];
+{const tl=document.getElementById('houseTl');houseEv.forEach(e=>tl.insertAdjacentHTML('beforeend',
+  `<div class="ev" data-c="house"><span class="yr">${e[0]}</span><span class="tag c-house">房产</span>
+   <span style="font-weight:600">${e[2]}</span><div class="desc">${e[3]}</div></div>`));}
+
+/* ---------- Tab 切换 ---------- */
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('show'));
+  document.getElementById(b.dataset.t).classList.add('show');window.scrollTo({top:0,behavior:'smooth'});});
+</script>
+</body>
+</html>
