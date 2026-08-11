@@ -78,6 +78,7 @@
   <button data-t="grain">🌾 粮食产量</button>
   <button data-t="events">📜 大事编年</button>
   <button data-t="cancer">🩺 癌症数据</button>
+  <button data-t="disease">🫀 重大疾病</button>
   <button data-t="gdp">💰 各省GDP</button>
   <button data-t="house">🏠 房地产变迁</button>
 </nav>
@@ -178,6 +179,31 @@
   <h2 class="tt" style="font-size:18px">2022 年各癌种新发病例（万例）</h2>
   <div class="card"><div class="chartbox" style="height:340px"><canvas id="cancerTypeChart"></canvas></div></div>
   <div class="card"><table id="cancerTable"><thead><tr><th>年份</th><th class="num">新发(万)</th><th class="num">死亡(万)</th><th>说明</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<!-- ============ 重大疾病 ============ -->
+<section id="disease">
+  <h2 class="tt">中国重大疾病 · 发展进展（关键节点）</h2>
+  <div class="note"><b>诚实说明</b>：慢病患病率受<b>诊断标准、筛查与老龄化</b>影响很大，不同年份口径不完全可比；<b>非逐年权威数据</b>，只取有据可查的里程碑。源：全国糖尿病流行病学调查、全国高血压抽样调查/中国高血压调查、《中国居民营养与慢性病状况报告》、全国乙肝血清流行病学调查、《中国心血管健康与疾病报告》、WHO。<b>仅供趋势参考，勿作精确引用或医疗依据</b>。</div>
+  <div class="kpis">
+    <div class="kpi"><div class="v">≈3.3<span style="font-size:14px">亿</span></div><div class="l">心血管病现患</div></div>
+    <div class="kpi"><div class="v">≈2.45<span style="font-size:14px">亿</span></div><div class="l">高血压患者</div></div>
+    <div class="kpi"><div class="v">≈1.4<span style="font-size:14px">亿</span></div><div class="l">糖尿病患者</div></div>
+    <div class="kpi"><div class="v">≈88<span style="font-size:14px">%</span></div><div class="l">慢病占总死亡</div></div>
+  </div>
+  <h2 class="tt" style="font-size:18px">糖尿病患病率（成人，%）：从 0.67% 到 12.4%</h2>
+  <div class="card"><div class="chartbox"><canvas id="diabetesChart"></canvas></div></div>
+  <h2 class="tt" style="font-size:18px">乙肝表面抗原携带率（全人群，%）—— 疫苗成效</h2>
+  <div class="card"><div class="chartbox" style="height:300px"><canvas id="hbvChart"></canvas></div></div>
+  <div class="card"><div class="scroll"><table id="diseaseTable"><thead><tr><th>疾病 / 指标</th><th>早期</th><th>近期</th><th>说明（含出处）</th></tr></thead><tbody></tbody></table></div></div>
+  <h2 class="tt" style="font-size:18px">胆囊癌（含胆囊腺癌）· 科普要点</h2>
+  <div class="card" style="font-size:13.5px;line-height:1.95">
+    <div>· <b>是什么</b>：胆囊癌是胆道系统最常见的恶性肿瘤，其中<b>腺癌占绝大多数（约 80–90%）</b>；在全部癌症中占比不大，但起病隐匿、进展较快，总体预后偏差。</div>
+    <div>· <b>发病概况</b>：中国发病率约 <b>3–4/10万</b>（地区差异较大，西部及部分地区偏高），<b>女性高于男性（约 2:1）</b>，多见于 50 岁以上。</div>
+    <div>· <b>高危因素</b>：胆囊结石（尤其较大或病史长）、慢性胆囊炎、胆囊息肉（>1cm）、瓷化胆囊、肥胖、年龄增长。</div>
+    <div>· <b>关键在“早”</b>：分期决定预后差别极大——早期（常为手术中偶然发现、局限于黏膜/肌层）根治后 5 年生存明显较好；中晚期总体 5 年生存率低。定期体检、对高危胆囊问题及时随访处理是要点。</div>
+    <div class="note" style="margin-top:10px">科普汇总（源：国家癌症中心、临床诊疗指南及公开文献）。个体差异大，<b>不构成诊断或治疗建议，具体以专科医生为准</b>。</div>
+  </div>
 </section>
 
 <!-- ============ GDP ============ -->
@@ -323,6 +349,22 @@ const ctype=[['肺癌',106.06],['结直肠癌',51.71],['甲状腺癌',46.61],['�
 new Chart(document.getElementById('cancerTypeChart'),{type:'bar',
   data:{labels:ctype.map(d=>d[0]),datasets:[{label:'2022新发(万例)',data:ctype.map(d=>d[1]),backgroundColor:'#f4a261'}]},
   options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:LEG,scales:AX}});
+
+/* ---------- 重大疾病 ---------- */
+// 糖尿病成人患病率(%)：全国流调各版 / Yang NEJM2010 / Wang JAMA2017 / Li BMJ2020
+const diabetes=[[1980,0.67],[1994,2.51],[2002,2.60],[2013,10.9],[2018,12.4]];
+line('diabetesChart',diabetes.map(d=>d[0]),diabetes.map(d=>d[1]),'糖尿病患病率(%)','#e63946','rgba(230,57,70,.15)');
+// 乙肝HBsAg携带率(全人群,%)：1992、2006 两次全国血清流调
+const hbv=[[1992,9.75],[2006,7.18]];
+line('hbvChart',hbv.map(d=>d[0]),hbv.map(d=>d[1]),'乙肝携带率(%)','#2a9d8f','rgba(42,157,143,.15)');
+fillTable('#diseaseTable',[
+ ['糖尿病患病率(成人)','0.67% (1980)','12.4% (2018)','诊断标准与老龄化推高；患者约1.4亿。源：全国糖尿病流调/BMJ2020'],
+ ['高血压患病率(成人)','7.7% (1979-80)','27.9% (2015)','患者约2.45亿。源：全国高血压抽样调查/中国高血压调查'],
+ ['乙肝表面抗原携带率','9.75% (1992)','7.18% (2006)','乙肝疫苗纳入计划免疫后，1-29岁人群2014年已降至约2.6%'],
+ ['心血管病现患人数','≈2.9亿 (2015报告)','≈3.3亿 (2021报告)','居民死因首位，城乡CVD死亡占比约44%-48%。源：中国心血管健康与疾病报告'],
+ ['慢性病(NCD)致死占比','—','≈88% (近年)','心脑血管病、癌症、慢性呼吸病、糖尿病为主。源：WHO'],
+ ['结核病报告发病率','较高 (上世纪)','约52/10万 (近年)','防治体系完善后持续下降，仍是重点传染病。源：全国结核病报告']
+]);
 
 /* ---------- GDP（万亿元）---------- */
 const gdp={
